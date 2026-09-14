@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HSK5 — 阅读(1)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .counter {
+            font-size: 1.2em;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        .card-container {
+            -webkit-perspective: 1000px;
+            perspective: 1000px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            width: 100%;
+            height: 420px;
+            position: relative;
+            transition: transform 0.6s ease;
+            -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-front {
+            background: white;
+            z-index: 2;
+            -webkit-transform: rotateY(0deg);
+            transform: rotateY(0deg);
+        }
+
+        .card-back {
+            background: #1e293b;
+            -webkit-transform: rotateY(180deg);
+            transform: rotateY(180deg);
+            z-index: 1;
+        }
+
+        .hanzi {
+            font-size: 4.5em;
+            color: #000000;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-family: 'KaiTi', 'SimSun', 'Microsoft YaHei', 'STKaiti', serif;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .card-back-content {
+            text-align: center;
+            color: #fbbf24;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .pinyin {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #93c5fd;
+        }
+
+        .part-of-speech {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+            color: #cbd5e1;
+        }
+
+        .translation {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .collocations {
+            font-size: 1em;
+            color: #a5b4fc;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 92%;
+            line-height: 1.6;
+            border-left: 3px solid #fbbf24;
+            text-align: left;
+        }
+
+        .collocations-label {
+            font-size: 0.75em;
+            color: #94a3b8;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .navigation {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .completion-screen {
+            display: none;
+            text-align: center;
+            color: white;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .completion-screen h2 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .completion-screen p {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+        }
+
+        .hint {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                height: 380px;
+            }
+
+            .hanzi {
+                font-size: 3.5em;
+            }
+
+            .pinyin {
+                font-size: 1.4em;
+            }
+
+            .translation {
+                font-size: 1.1em;
+            }
+
+            .collocations {
+                font-size: 0.85em;
+                padding: 10px 12px;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.85em;
+            }
+
+            .header h1 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🇨🇳 HSK5 — 阅读(1)</h1>
+            <div class="counter" id="counter">Карточка 1 из 1</div>
+        </div>
+
+        <div id="cardView">
+            <div class="card-container">
+                <div class="card" id="flashcard">
+                    <div class="card-face card-front">
+                        <div class="hanzi" id="hanzi"></div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="card-back-content">
+                            <div class="pinyin" id="pinyin"></div>
+                            <div class="part-of-speech" id="partOfSpeech"></div>
+                            <div class="translation" id="translation"></div>
+                            <div class="collocations">
+                                <div class="collocations-label">📌 配合词</div>
+                                <div id="collocations"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hint">💡 Нажмите на карточку, чтобы перевернуть</div>
+
+            <div class="controls">
+                <button class="btn btn-warning" onclick="shuffleCards()">🔀 Перемешать</button>
+                <button class="btn btn-success" onclick="markAsLearned()">✓ Запомнил</button>
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-primary" onclick="previousCard()">← Назад</button>
+                <button class="btn btn-primary" onclick="nextCard()">Вперед →</button>
+            </div>
+        </div>
+
+        <div class="completion-screen" id="completionScreen">
+            <h2>🎉 恭喜！</h2>
+            <p>Вы изучили все карточки!</p>
+            <button class="btn btn-primary" onclick="resetCards()">🔄 Начать заново</button>
+        </div>
+    </div>
+
+    <script>
+        const cardsData = [
+            { hanzi: '成果', pinyin: 'chéngguǒ', pos: '', translation: 'результат, достижение', collocations: '劳动成果；研究成果；取得成果' },
+            { hanzi: '后果', pinyin: 'hòuguǒ', pos: '', translation: 'последствия', collocations: '严重后果；造成后果；不良后果' },
+            { hanzi: '结论', pinyin: 'jiélùn', pos: '', translation: 'вывод, заключение', collocations: '得出结论；实验结论；最终结论' },
+            { hanzi: '完成', pinyin: 'wánchéng', pos: '', translation: 'выполнить, закончить', collocations: '完成任务；完成工作；按时完成' },
+            { hanzi: '处理', pinyin: 'chǔlǐ', pos: '', translation: 'обрабатывать, решать', collocations: '处理信息；处理问题；处理数据' },
+            { hanzi: '识别', pinyin: 'shíbié', pos: '', translation: 'распознавать, идентифицировать', collocations: '识别图像；识别文字；人脸识别' },
+            { hanzi: '控制', pinyin: 'kòngzhì', pos: '', translation: 'контролировать', collocations: '控制速度；控制情绪；控制机器' },
+            { hanzi: '确保', pinyin: 'quèbǎo', pos: '', translation: 'гарантировать, обеспечить', collocations: '确保安全；确保质量；确保顺利' },
+            { hanzi: '心率', pinyin: 'xīnlǜ', pos: '', translation: 'частота сердцебиения', collocations: '正常心率；监测心率；心率过高' },
+            { hanzi: '频率', pinyin: 'pínlǜ', pos: '', translation: 'частота', collocations: '控制频率；增加频率；更新频率' },
+            { hanzi: '反复', pinyin: 'fǎnfù', pos: '', translation: 'неоднократно, снова и снова', collocations: '反复练习；反复强调；反复检查' },
+            { hanzi: '再三', pinyin: 'zàisān', pos: '', translation: 'неоднократно', collocations: '再三提醒；再三考虑；再三请求' },
+            { hanzi: '重新', pinyin: 'chóngxīn', pos: '', translation: 'заново, снова', collocations: '重新开始；重新开通；重新修建' },
+            { hanzi: '偶尔', pinyin: 'ǒu\'ěr', pos: '', translation: 'иногда, изредка', collocations: '偶尔发生；偶尔出现；偶尔加班；反义词：经常' },
+            { hanzi: '核心', pinyin: 'héxīn', pos: '', translation: 'ядро, ключевая часть', collocations: '核心技术；核心观点；核心问题' },
+            { hanzi: '当地', pinyin: 'dāngdì', pos: '', translation: 'местный, здешний', collocations: '当地美食；当地居民；当地文化' },
+            { hanzi: '因素', pinyin: 'yīnsù', pos: '', translation: 'фактор', collocations: '关键因素；重要因素；影响因素' },
+            { hanzi: '内部', pinyin: 'nèibù', pos: '', translation: 'внутренний, внутри', collocations: '内部结构；内部装修；车厢内部；反义词：外部' },
+            { hanzi: '追', pinyin: 'zhuī', pos: '', translation: 'преследовать, догонять', collocations: '追汽车；追赶人群；追上' },
+            { hanzi: '逛', pinyin: 'guàng', pos: '', translation: 'гулять, ходить по магазинам/достопримечательностям', collocations: '逛街；逛景点；逛遍全城' },
+            { hanzi: '冲', pinyin: 'chōng', pos: '', translation: 'мчаться, бросаться', collocations: '冲向终点；冲出去；往前冲' },
+            { hanzi: '划', pinyin: 'huá', pos: '', translation: 'грести', collocations: '划船；划过去；划到对岸' },
+            { hanzi: '拆除', pinyin: 'chāichú', pos: '', translation: 'демонтировать, снести', collocations: '拆除房屋；拆除桥梁；拆除围墙' },
+            { hanzi: '旅途', pinyin: 'lǚtú', pos: '', translation: 'путешествие, дорога', collocations: '旅途愉快；旅途风景；漫长的旅途' },
+            { hanzi: '终点', pinyin: 'zhōngdiǎn', pos: '', translation: 'конечная точка', collocations: '到达终点；行程终点；比赛终点；反义词：起点' },
+            { hanzi: '出自', pinyin: 'chūzì', pos: '', translation: 'происходить из; быть созданным', collocations: '出自画家之手；出自古代；出自名著' },
+            { hanzi: '开通', pinyin: 'kāitōng', pos: '', translation: 'открыть движение, запустить', collocations: '重新开通；正式开通；开通线路' },
+            { hanzi: '连结', pinyin: 'liánjié', pos: '', translation: 'соединять', collocations: '连结景点；连结城市；相互连结' },
+            { hanzi: '复古', pinyin: 'fùgǔ', pos: '', translation: 'ретро, в стиле старины', collocations: '复古装修；复古风格；复古车厢' },
+            { hanzi: '温馨', pinyin: 'wēnxīn', pos: '', translation: 'уютный, тёплый', collocations: '温馨的灯光；温馨的氛围；温馨至极' },
+            { hanzi: '趟', pinyin: 'tàng', pos: '', translation: 'раз (о поездке/поездке туда-обратно)', collocations: '一趟行程；一趟火车；一趟游览' },
+            { hanzi: '行程', pinyin: 'xíngchéng', pos: '', translation: 'маршрут, ход поездки', collocations: '一趟行程；完整行程；安排好行程' },
+            { hanzi: '斑驳', pinyin: 'bānbó', pos: '', translation: 'покрытый следами времени, облупившийся', collocations: '墙面斑驳；建筑斑驳；斑驳的老屋' },
+            { hanzi: '述说', pinyin: 'shùshuō', pos: '', translation: 'рассказывать, повествовать', collocations: '述说往事；述说岁月；述说时光流逝' },
+            { hanzi: '时光', pinyin: 'shíguāng', pos: '', translation: 'время, годы', collocations: '美好时光；旧时光；时光流逝' }
+        ];
+
+        let cards = [...cardsData];
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        const flashcard = document.getElementById('flashcard');
+        const hanziEl = document.getElementById('hanzi');
+        const pinyinEl = document.getElementById('pinyin');
+        const partOfSpeechEl = document.getElementById('partOfSpeech');
+        const translationEl = document.getElementById('translation');
+        const collocationsEl = document.getElementById('collocations');
+        const counterEl = document.getElementById('counter');
+        const cardView = document.getElementById('cardView');
+        const completionScreen = document.getElementById('completionScreen');
+
+        // ===== ГЛАВНОЕ: переворот через style.transform =====
+        function flipCard() {
+            if (isFlipped) {
+                flashcard.style.webkitTransform = 'rotateY(0deg)';
+                flashcard.style.transform = 'rotateY(0deg)';
+                isFlipped = false;
+            } else {
+                flashcard.style.webkitTransform = 'rotateY(180deg)';
+                flashcard.style.transform = 'rotateY(180deg)';
+                isFlipped = true;
+            }
+        }
+
+        // Клик по карточке
+        flashcard.addEventListener('click', flipCard);
+
+        function updateCard() {
+            if (cards.length === 0) {
+                showCompletionScreen();
+                return;
+            }
+
+            const card = cards[currentIndex];
+            hanziEl.textContent = card.hanzi;
+            pinyinEl.textContent = card.pinyin;
+            partOfSpeechEl.textContent = card.pos;
+            translationEl.textContent = card.translation;
+            collocationsEl.textContent = card.collocations || '—';
+
+            // Всегда сбрасываем на лицевую сторону при смене карточки
+            flashcard.style.webkitTransform = 'rotateY(0deg)';
+            flashcard.style.transform = 'rotateY(0deg)';
+            isFlipped = false;
+
+            updateCounter();
+        }
+
+        function updateCounter() {
+            counterEl.textContent = 'Карточка ' + (currentIndex + 1) + ' из ' + cards.length;
+        }
+
+        function nextCard() {
+            if (currentIndex < cards.length - 1) {
+                currentIndex++;
+                updateCard();
+            }
+        }
+
+        function previousCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            }
+        }
+
+        function shuffleCards() {
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        }
+
+        function markAsLearned() {
+            if (cards.length === 0) return;
+
+            cards.splice(currentIndex, 1);
+
+            if (cards.length === 0) {
+                showCompletionScreen();
+            } else {
+                if (currentIndex >= cards.length) {
+                    currentIndex = cards.length - 1;
+                }
+                updateCard();
+            }
+        }
+
+        function showCompletionScreen() {
+            cardView.style.display = 'none';
+            completionScreen.style.display = 'block';
+        }
+
+        function resetCards() {
+            cards = cardsData.map(c => ({ ...c }));
+            currentIndex = 0;
+            cardView.style.display = 'block';
+            completionScreen.style.display = 'none';
+            updateCard();
+        }
+
+        // Клавиши
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') previousCard();
+            if (e.key === 'ArrowRight') nextCard();
+            if (e.key === ' ') {
+                e.preventDefault();
+                flipCard();
+            }
+        });
+
+        updateCard();
+    </script>
+</body>
+</html>

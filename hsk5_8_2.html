@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HSK5 — 阅读(1)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .counter {
+            font-size: 1.2em;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        .card-container {
+            -webkit-perspective: 1000px;
+            perspective: 1000px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            width: 100%;
+            height: 420px;
+            position: relative;
+            transition: transform 0.6s ease;
+            -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-front {
+            background: white;
+            z-index: 2;
+            -webkit-transform: rotateY(0deg);
+            transform: rotateY(0deg);
+        }
+
+        .card-back {
+            background: #1e293b;
+            -webkit-transform: rotateY(180deg);
+            transform: rotateY(180deg);
+            z-index: 1;
+        }
+
+        .hanzi {
+            font-size: 4.5em;
+            color: #000000;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-family: 'KaiTi', 'SimSun', 'Microsoft YaHei', 'STKaiti', serif;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .card-back-content {
+            text-align: center;
+            color: #fbbf24;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .pinyin {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #93c5fd;
+        }
+
+        .part-of-speech {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+            color: #cbd5e1;
+        }
+
+        .translation {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .collocations {
+            font-size: 1em;
+            color: #a5b4fc;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 92%;
+            line-height: 1.6;
+            border-left: 3px solid #fbbf24;
+            text-align: left;
+        }
+
+        .collocations-label {
+            font-size: 0.75em;
+            color: #94a3b8;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .navigation {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .completion-screen {
+            display: none;
+            text-align: center;
+            color: white;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .completion-screen h2 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .completion-screen p {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+        }
+
+        .hint {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                height: 380px;
+            }
+
+            .hanzi {
+                font-size: 3.5em;
+            }
+
+            .pinyin {
+                font-size: 1.4em;
+            }
+
+            .translation {
+                font-size: 1.1em;
+            }
+
+            .collocations {
+                font-size: 0.85em;
+                padding: 10px 12px;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.85em;
+            }
+
+            .header h1 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🇨🇳 HSK5 — 阅读(1)</h1>
+            <div class="counter" id="counter">Карточка 1 из 1</div>
+        </div>
+
+        <div id="cardView">
+            <div class="card-container">
+                <div class="card" id="flashcard">
+                    <div class="card-face card-front">
+                        <div class="hanzi" id="hanzi"></div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="card-back-content">
+                            <div class="pinyin" id="pinyin"></div>
+                            <div class="part-of-speech" id="partOfSpeech"></div>
+                            <div class="translation" id="translation"></div>
+                            <div class="collocations">
+                                <div class="collocations-label">📌 配合词</div>
+                                <div id="collocations"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hint">💡 Нажмите на карточку, чтобы перевернуть</div>
+
+            <div class="controls">
+                <button class="btn btn-warning" onclick="shuffleCards()">🔀 Перемешать</button>
+                <button class="btn btn-success" onclick="markAsLearned()">✓ Запомнил</button>
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-primary" onclick="previousCard()">← Назад</button>
+                <button class="btn btn-primary" onclick="nextCard()">Вперед →</button>
+            </div>
+        </div>
+
+        <div class="completion-screen" id="completionScreen">
+            <h2>🎉 恭喜！</h2>
+            <p>Вы изучили все карточки!</p>
+            <button class="btn btn-primary" onclick="resetCards()">🔄 Начать заново</button>
+        </div>
+    </div>
+
+    <script>
+        const cardsData = [
+            { hanzi: '同时', pinyin: 'tóngshí', pos: '', translation: 'одновременно', collocations: '同时进行；同时发生；同时完成' },
+            { hanzi: '事先', pinyin: 'shìxiān', pos: '', translation: 'заранее', collocations: '事先准备；事先通知；事先安排' },
+            { hanzi: '将来', pinyin: 'jiānglái', pos: '', translation: 'будущее; в будущем', collocations: '将来的生活；将来发展；将来可能' },
+            { hanzi: '看似', pinyin: 'kànsì', pos: '', translation: 'казаться на вид', collocations: '看似简单；看似容易；看似……但实际上……' },
+            { hanzi: '贫困', pinyin: 'pínkùn', pos: '', translation: 'бедность, бедный', collocations: '生活贫困；家境贫困；摆脱贫困；反义词：富裕；富有' },
+            { hanzi: '毕竟', pinyin: 'bìjìng', pos: '', translation: 'в конце концов, всё-таки', collocations: '毕竟是；毕竟……；毕竟不同' },
+            { hanzi: '只好', pinyin: 'zhǐhǎo', pos: '', translation: 'оставаться только, ничего не остаётся кроме', collocations: '只好放弃；只好等待；只好离开' },
+            { hanzi: '何必', pinyin: 'hébì', pos: '', translation: 'зачем; к чему', collocations: '何必这样；何必麻烦；何必亲自去' },
+            { hanzi: '或许', pinyin: 'huòxǔ', pos: '', translation: 'возможно, быть может', collocations: '或许可以；或许会；或许因为' },
+            { hanzi: '信号', pinyin: 'xìnhào', pos: '', translation: 'сигнал', collocations: '发出信号；接收信号；信号灯' },
+            { hanzi: '食物', pinyin: 'shíwù', pos: '', translation: 'пища, еда', collocations: '食物安全；食物来源；食物浪费' },
+            { hanzi: '空间', pinyin: 'kōngjiān', pos: '', translation: 'пространство', collocations: '活动空间；生活空间；发展空间' },
+            { hanzi: '事实', pinyin: 'shìshí', pos: '', translation: 'факт, действительность', collocations: '事实证明；面对事实；客观事实' },
+            { hanzi: '反而', pinyin: 'fǎn\'ér', pos: '', translation: 'напротив, вместо этого', collocations: '反而更好；反而增加；反而变成' },
+            { hanzi: '盘中餐', pinyin: 'pánzhōngcān', pos: '', translation: 'еда на тарелке; пища', collocations: '爱惜盘中餐；盘中餐' },
+            { hanzi: '参考', pinyin: 'cānkǎo', pos: '', translation: 'обращаться к; использовать как ориентир', collocations: '参考资料；参考答案；供参考' },
+            { hanzi: '启发', pinyin: 'qǐfā', pos: '', translation: 'вдохновлять; давать идею', collocations: '受到启发；得到启发；启发思维' },
+            { hanzi: '提倡', pinyin: 'tíchàng', pos: '', translation: 'пропагандировать, выступать за', collocations: '提倡科学；提倡节约；提倡平等' },
+            { hanzi: '推荐', pinyin: 'tuījiàn', pos: '', translation: 'рекомендовать', collocations: '推荐产品；推荐朋友；值得推荐' },
+            { hanzi: '防御', pinyin: 'fángyù', pos: '', translation: 'защита; защищать', collocations: '防御攻击；防御危险；自我防御' },
+            { hanzi: '趁机', pinyin: 'chènjī', pos: '', translation: 'воспользоваться случаем', collocations: '趁机离开；趁机行动；趁机休息' },
+            { hanzi: '不顾一切', pinyin: 'bùgù-yíqiè', pos: '', translation: 'невзирая ни на что', collocations: '不顾一切地逃跑；不顾一切地冲上去' },
+            { hanzi: '消耗', pinyin: 'xiāohào', pos: '', translation: 'расходовать, потреблять', collocations: '消耗能源；消耗时间；消耗体力' },
+            { hanzi: '效率', pinyin: 'xiàolǜ', pos: '', translation: 'эффективность', collocations: '工作效率；学习效率；提高效率' },
+            { hanzi: '研制', pinyin: 'yánzhì', pos: '', translation: 'разрабатывать, создавать', collocations: '研制新药；研制飞机；研制成功' },
+            { hanzi: '保存', pinyin: 'bǎocún', pos: '', translation: 'сохранять', collocations: '保存文件；保存食物；保存照片' },
+            { hanzi: '体现', pinyin: 'tǐxiàn', pos: '', translation: 'отражать, воплощать', collocations: '体现品质；体现文化；体现精神' },
+            { hanzi: '表现', pinyin: 'biǎoxiàn', pos: '', translation: 'проявлять; поведение, результат', collocations: '表现自己；表现很好；工作表现' },
+            { hanzi: '坚持', pinyin: 'jiānchí', pos: '', translation: 'придерживаться, продолжать', collocations: '坚持学习；坚持锻炼；坚持到底' },
+            { hanzi: '保持', pinyin: 'bǎochí', pos: '', translation: 'сохранять, поддерживать', collocations: '保持平稳；保持安静；保持平衡' },
+            { hanzi: '完全', pinyin: 'wánquán', pos: '', translation: 'полностью, совершенно', collocations: '完全正确；完全忘记；完全不同' },
+            { hanzi: '唯一', pinyin: 'wéiyī', pos: '', translation: 'единственный', collocations: '唯一办法；唯一选择；唯一结果' },
+            { hanzi: '所有', pinyin: 'suǒyǒu', pos: '', translation: 'все, весь', collocations: '所有事情；所有任务；所有人' },
+            { hanzi: '各自', pinyin: 'gèzì', pos: '', translation: 'каждый сам по себе, соответственно', collocations: '各自的想法；各自分工；各自负责' }
+        ];
+
+        let cards = [...cardsData];
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        const flashcard = document.getElementById('flashcard');
+        const hanziEl = document.getElementById('hanzi');
+        const pinyinEl = document.getElementById('pinyin');
+        const partOfSpeechEl = document.getElementById('partOfSpeech');
+        const translationEl = document.getElementById('translation');
+        const collocationsEl = document.getElementById('collocations');
+        const counterEl = document.getElementById('counter');
+        const cardView = document.getElementById('cardView');
+        const completionScreen = document.getElementById('completionScreen');
+
+        // ===== ГЛАВНОЕ: переворот через style.transform =====
+        function flipCard() {
+            if (isFlipped) {
+                flashcard.style.webkitTransform = 'rotateY(0deg)';
+                flashcard.style.transform = 'rotateY(0deg)';
+                isFlipped = false;
+            } else {
+                flashcard.style.webkitTransform = 'rotateY(180deg)';
+                flashcard.style.transform = 'rotateY(180deg)';
+                isFlipped = true;
+            }
+        }
+
+        // Клик по карточке
+        flashcard.addEventListener('click', flipCard);
+
+        function updateCard() {
+            if (cards.length === 0) {
+                showCompletionScreen();
+                return;
+            }
+
+            const card = cards[currentIndex];
+            hanziEl.textContent = card.hanzi;
+            pinyinEl.textContent = card.pinyin;
+            partOfSpeechEl.textContent = card.pos;
+            translationEl.textContent = card.translation;
+            collocationsEl.textContent = card.collocations || '—';
+
+            // Всегда сбрасываем на лицевую сторону при смене карточки
+            flashcard.style.webkitTransform = 'rotateY(0deg)';
+            flashcard.style.transform = 'rotateY(0deg)';
+            isFlipped = false;
+
+            updateCounter();
+        }
+
+        function updateCounter() {
+            counterEl.textContent = 'Карточка ' + (currentIndex + 1) + ' из ' + cards.length;
+        }
+
+        function nextCard() {
+            if (currentIndex < cards.length - 1) {
+                currentIndex++;
+                updateCard();
+            }
+        }
+
+        function previousCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            }
+        }
+
+        function shuffleCards() {
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        }
+
+        function markAsLearned() {
+            if (cards.length === 0) return;
+
+            cards.splice(currentIndex, 1);
+
+            if (cards.length === 0) {
+                showCompletionScreen();
+            } else {
+                if (currentIndex >= cards.length) {
+                    currentIndex = cards.length - 1;
+                }
+                updateCard();
+            }
+        }
+
+        function showCompletionScreen() {
+            cardView.style.display = 'none';
+            completionScreen.style.display = 'block';
+        }
+
+        function resetCards() {
+            cards = cardsData.map(c => ({ ...c }));
+            currentIndex = 0;
+            cardView.style.display = 'block';
+            completionScreen.style.display = 'none';
+            updateCard();
+        }
+
+        // Клавиши
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') previousCard();
+            if (e.key === 'ArrowRight') nextCard();
+            if (e.key === ' ') {
+                e.preventDefault();
+                flipCard();
+            }
+        });
+
+        updateCard();
+    </script>
+</body>
+</html>
